@@ -1,4 +1,5 @@
 import socket
+import sys
 import configparser
 import gi
 gi.require_version('Gtk', '3.0')
@@ -13,6 +14,11 @@ myMachine = socket.gethostname()
 
 # getting the IP address of the local machine
 myIPAddress = socket.gethostbyname(myMachine)
+
+# getting the network interfaces of the local machine
+myNetworkInterfaces = socket.if_nameindex()
+
+print(myNetworkInterfaces)
 
 # Describe the main operations window
 class OpsWindow(Gtk.Window):
@@ -39,18 +45,11 @@ class OpsWindow(Gtk.Window):
         # Describing a label with the local machine hostname
         self.lblHostName = Gtk.Label()
         self.lblHostName.set_justify(Gtk.Justification.LEFT)
-        self.lblHostName.set_text(str(myMachine))
+        self.lblHostName.set_text(str(myMachine) + ": " + str(myIPAddress))
         self.lblHostName.show()
-
-        # Describing a label with the local machine IP address
-        self.lblIP = Gtk.Label()
-        self.lblIP.set_justify(Gtk.Justification.LEFT)
-        self.lblIP.set_text(str(myIPAddress))
-        self.lblIP.show()
 
         # Adding labels to SysBar
         self.SysBar.add(self.lblHostName)
-        self.SysBar.add(self.lblIP)
         self.HeaderBar.pack_start(self.SysBar)
 
         # Adding the main window container
