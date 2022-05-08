@@ -1,5 +1,4 @@
 import socket
-import sys
 import configparser
 import gi
 gi.require_version('Gtk', '3.0')
@@ -52,7 +51,7 @@ class OpsWindow(Gtk.Window):
         self.SysBar.set_border_width(3)
         self.SysBar.show()
 
-        # Describing a label with the local machine hostname
+        # Describing a label with the local machine hostname, local and net IP addresses
         self.lblHostName = Gtk.Label()
         self.lblHostName.set_justify(Gtk.Justification.LEFT)
         self.lblHostName.set_markup(
@@ -71,7 +70,7 @@ class OpsWindow(Gtk.Window):
         self.ControlBar.set_border_width(5)
         self.ControlBar.show()
 
-        # Creating a drop-down menu with interface names in it
+        # Creating a drop-down menu with interface names in it:
 
         # Setting up the ListStore to hold the data from the interfaces list
         IntList_store = Gtk.ListStore(int,str)
