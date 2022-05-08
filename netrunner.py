@@ -9,11 +9,19 @@ from gi.repository import Gtk, Gdk, Gio, Pango
 config = configparser.ConfigParser()
 config.read('netrunner_config.ini')
 
+# set up the ping tool
+pinger = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
 # getting the hostname of the local machine
 myMachine = socket.gethostname()
 
-# getting the IP address of the local machine
+# getting the LAN IP address of the local machine
 myIPAddress = socket.gethostbyname(myMachine)
+
+# getting the net IP address of the local machine
+pinger.connect(("8.8.8.8", 80))
+myNetIPAddress = str(pinger.getsockname()[0])
+pinger.close
 
 # getting the network interfaces of the local machine
 myNetworkInterfaces = socket.if_nameindex()
@@ -41,13 +49,17 @@ class OpsWindow(Gtk.Window):
 
         # HeaderBar left side container - SysBar
         self.SysBar = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.SysBar.set_border_width(5)
+        self.SysBar.set_border_width(3)
         self.SysBar.show()
 
         # Describing a label with the local machine hostname
         self.lblHostName = Gtk.Label()
         self.lblHostName.set_justify(Gtk.Justification.LEFT)
-        self.lblHostName.set_text(str(myMachine) + ": " + str(myIPAddress))
+        self.lblHostName.set_markup(
+            "<b>" + str(myMachine) + "</b>: \n" + 
+            "Local IP: " + str(myIPAddress) + "\n" + 
+            "Net IP: " + str(myNetIPAddress)
+            )
         self.lblHostName.show()
 
         # Adding labels to SysBar
