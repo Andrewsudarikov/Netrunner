@@ -39,7 +39,9 @@ class OpsWindow(Gtk.Window):
         self.set_titlebar(self.HeaderBar)
         self.HeaderBar.show()
 
+        # HeaderBar left side container - SysBar
         self.SysBar = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.SysBar.set_border_width(5)
         self.SysBar.show()
 
         # Describing a label with the local machine hostname
@@ -51,6 +53,43 @@ class OpsWindow(Gtk.Window):
         # Adding labels to SysBar
         self.SysBar.add(self.lblHostName)
         self.HeaderBar.pack_start(self.SysBar)
+
+        # HeaderBar right side container - ControlBar
+        self.ControlBar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        self.ControlBar.set_border_width(5)
+        self.ControlBar.show()
+
+        # Creating a drop-down menu with interface names in it
+
+        # Setting up the ListStore to hold the data from the interfaces list
+        IntList_store = Gtk.ListStore(int,str)
+        
+        # Parsing the interfaces string into the list and printing every list items into the terminal
+        for IntData in myNetworkInterfaces: 
+                IntList_store.append(IntData)
+                print(IntData)
+        
+        # Creating a ComboBox instance
+        self.InterfaceSelector = Gtk.ComboBox.new_with_model_and_entry(IntList_store)
+
+        # Calling the text renderer to write the values into the ComboBox as text
+        renderer_interfaces = Gtk.CellRendererText()
+
+        # Starting the ComboBox instance
+        self.InterfaceSelector.pack_start(renderer_interfaces, True)
+
+        # Forcing the second column to be rendered in the ComboBox
+        self.InterfaceSelector.set_entry_text_column(1)
+
+        # Adding the column that will sort the values
+        self.InterfaceSelector.add_attribute(renderer_interfaces, "text", 0)
+
+        # Showing the result on the form
+        self.InterfaceSelector.show()
+
+        # Adding elements to ControlBar
+        self.ControlBar.add(self.InterfaceSelector)
+        self.HeaderBar.pack_end(self.ControlBar)
 
         # Adding the main window container
         self.MainContainer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
