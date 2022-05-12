@@ -159,41 +159,130 @@ class OpsWindow(Gtk.Window):
         self.add(self.MainContainer)
         self.MainContainer.show()
 
+#       Describing the welcome screen container
+        self.Welcome_Screen = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.Welcome_Screen.set_border_width(35)
+        self.MainContainer.add(self.Welcome_Screen)
+        
+        # Creating elements for the Welcome screen
+        self.lblWelcome = Gtk.Label()
+        self.lblWelcome.set_markup(
+                "<big>Netrunner</big>\n" +
+                "Network device config monitoring tool"
+        )
+        self.Welcome_Screen.add(self.lblWelcome)
+
+        self.chkWelcome = Gtk.CheckButton(label="Show welcome screen at startup")
+        self.chkWelcome.connect("toggled", self.on_chkWelcome_toggled)
+        self.Welcome_Screen.add(self.chkWelcome)
+
+        # Adding elements to the Welcome screen
+
+#       Describing the Scan screen container
+        self.Scan_Screen = Gtk.Box()
+
+#       Describing the screen load sequence
+        config.read('netrunner-config.ini')
+        Config_welcome = bool(config.get('STARTUP', 'welcome_screen'))
+        if Config_welcome == True:
+                print("Welcome screen is enabled")
+                self.chkWelcome.set_active(True)
+                self.Welcome_Screen.show()
+        else:
+                print("Welcome screen is disabled")
+
 #   Operating the local machine info button
     def task_SysInfo_clicked(self, btnSysInfo):
         self.LocalMachinePopover.set_relative_to(btnSysInfo)
         self.LocalMachinePopover.show_all()
         self.LocalMachinePopover.popup()
 
+#   Operating the Show welcome screen at startup checkbox
+    def on_chkWelcome_toggled(self, chkWelcome):
+        config.read('netrunner-config.ini')
+        Config_welcome = bool(config.get('STARTUP', 'welcome_screen'))
+        if self.chkWelcome.get_active():
+                self.chkWelcome.set_active(False)
+                config.set('STARTUP', 'welcome_screen', 'False')
+                with open('netrunner-config.ini', 'w') as config_file:
+                        config.write(config_file)
+        else:
+                self.chkWelcome.set_active(True)
+                config.set('STARTUP', 'welcome_screen', 'True')
+                with open('netrunner-config.ini', 'w') as config_file:
+                        config.write(config_file)
+
 #   Operating the Scan toggle button
     def on_btnOpsScan_toggled(self, btnOpsScan):
         self.btnOpsScan.modify_bg(Gtk.StateType(0), Gdk.color_parse('#fcec0c'))
         self.btnOpsScan.modify_fg(Gtk.StateType(0), Gdk.color_parse('#000000'))
         self.btnOpsMap.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
+        self.btnOpsMap.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
         self.btnOpsRDP.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
+        self.btnOpsRDP.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
         self.btnOpsTests.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
+        self.btnOpsTests.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
+
+        # write the active tab number into config to open at next startup:
+        config.read('netrunner-config.ini')
+        config.set('STARTUP', 'active_tab', '1')
+        with open('netrunner-config.ini', 'w') as config_file:
+                config.write(config_file)
 
 #   Operating the Map toggle button
     def on_btnOpsMap_toggled(self, btnOpsMap):
-        self.btnOpsMap.modify_bg(Gtk.StateType(0), Gdk.gdk.color_parse('#fcec0c'))
+        self.btnOpsScan.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
+        self.btnOpsScan.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
+        self.btnOpsMap.modify_bg(Gtk.StateType(0), Gdk.color_parse('#fcec0c'))
+        self.btnOpsMap.modify_fg(Gtk.StateType(0), Gdk.color_parse('#000000'))
+        self.btnOpsRDP.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
+        self.btnOpsRDP.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
+        self.btnOpsTests.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
+        self.btnOpsTests.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
+
+        config.read('netrunner-config.ini')
+        config.set('STARTUP', 'active_tab', '2')
+        with open('netrunner-config.ini', 'w') as config_file:
+                config.write(config_file)
         
 #   Operating the RDP toggle button
     def on_btnOpsRDP_toggled(self, btnOpsRDP):
         self.btnOpsRDP.modify_bg(Gtk.StateType(0), Gdk.color_parse('#fcec0c'))
+        self.btnOpsRDP.modify_fg(Gtk.StateType(0), Gdk.color_parse('#000000'))
+        self.btnOpsScan.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
+        self.btnOpsScan.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
+        self.btnOpsMap.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
+        self.btnOpsMap.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
+        self.btnOpsTests.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
+        self.btnOpsTests.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
+
+        config.read('netrunner-config.ini')
+        config.set('STARTUP', 'active_tab', '3')
+        with open('netrunner-config.ini', 'w') as config_file:
+                config.write(config_file)
 
 #   Operating the Tests toggle button
     def on_btnOpsTests_toggled(self, btnOpsTests):
         self.btnOpsTests.modify_bg(Gtk.StateType(0), Gdk.color_parse('#fcec0c'))
+        self.btnOpsTests.modify_fg(Gtk.StateType(0), Gdk.color_parse('#000000'))
+        self.btnOpsScan.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
+        self.btnOpsScan.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
+        self.btnOpsMap.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
+        self.btnOpsMap.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
+        self.btnOpsRDP.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
+        self.btnOpsRDP.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
 
-    def pinger(job_q, results_q):
+        config.read('netrunner-config.ini')
+        config.set('STARTUP', 'active_tab', '4')
+        with open('netrunner-config.ini', 'w') as config_file:
+                config.write(config_file)
+
+    def Pinger(job_q, results_q):
         DEVNULL = open(os.devnull, 'w')
         while True:
-
             myIPAddress = job_q.get()
-
             if myIPAddress is None:
                 break
-
             try:
                 subprocess.check_call(['ping', '-c1', myIPAddress],
                                     stdout=DEVNULL)
@@ -215,7 +304,7 @@ class OpsWindow(Gtk.Window):
         ResultsStack = multiprocessing.Queue()
 
         # Describing the jobs pool structure and process
-        pool = [multiprocessing.Process(target=pinger, args=(JobsQueue, ResultsStack)) for i in range(pool_size)]
+        pool = [multiprocessing.Process(target=Pinger, args=(JobsQueue, ResultsStack)) for i in range(pool_size)]
 
         for GO in pool:
             GO.start()
