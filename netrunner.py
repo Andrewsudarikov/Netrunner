@@ -162,8 +162,7 @@ class OpsWindow(Gtk.Window):
 #       Describing the welcome screen container
         self.Welcome_Screen = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.Welcome_Screen.set_border_width(35)
-        self.MainContainer.add(self.Welcome_Screen)
-        
+                
         # Creating elements for the Welcome screen
         self.lblWelcome = Gtk.Label()
         self.lblWelcome.set_markup(
@@ -183,13 +182,16 @@ class OpsWindow(Gtk.Window):
 
 #       Describing the screen load sequence
         config.read('netrunner-config.ini')
-        Config_welcome = bool(config.get('STARTUP', 'welcome_screen'))
-        if Config_welcome == True:
+        Config_welcome = str(config.get('STARTUP', 'welcome_screen'))
+        if Config_welcome == 'True':
                 print("Welcome screen is enabled")
                 self.chkWelcome.set_active(True)
+                self.MainContainer.add(self.Welcome_Screen)
                 self.Welcome_Screen.show()
-        else:
+
+        if Config_welcome == 'False':
                 print("Welcome screen is disabled")
+                self.Welcome_Screen.hide()
 
 #   Operating the local machine info button
     def task_SysInfo_clicked(self, btnSysInfo):
@@ -202,16 +204,10 @@ class OpsWindow(Gtk.Window):
         config.read('netrunner-config.ini')
         Config_welcome = bool(config.get('STARTUP', 'welcome_screen'))
         if self.chkWelcome.get_active():
-                self.chkWelcome.set_active(False)
                 config.set('STARTUP', 'welcome_screen', 'False')
                 with open('netrunner-config.ini', 'w') as config_file:
                         config.write(config_file)
-        else:
-                self.chkWelcome.set_active(True)
-                config.set('STARTUP', 'welcome_screen', 'True')
-                with open('netrunner-config.ini', 'w') as config_file:
-                        config.write(config_file)
-
+        
 #   Operating the Scan toggle button
     def on_btnOpsScan_toggled(self, btnOpsScan):
         self.btnOpsScan.modify_bg(Gtk.StateType(0), Gdk.color_parse('#fcec0c'))
