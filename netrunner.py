@@ -1,8 +1,6 @@
 import socket
 import configparser
-import multiprocessing
-import subprocess
-import os
+import networkscan
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, Gio, Pango
@@ -28,6 +26,11 @@ NetIP_puller.close
 # getting the network interfaces of the local machine
 myNetworkInterfaces = socket.if_nameindex()
 
+class ListBoxDataRow(Gtk.ListBoxRow):
+    def __init__(self, data):
+        super().__init__()
+        self.data = data
+        self.add(Gtk.Label(label=data))
 # Describe the main operations window
 class OpsWindow(Gtk.Window):
 
@@ -175,14 +178,22 @@ class OpsWindow(Gtk.Window):
         self.chkWelcome.connect("toggled", self.on_chkWelcome_toggled)
         self.Welcome_Screen.add(self.chkWelcome)
 
-        # Adding elements to the Welcome screen
-
 #       Describing the Scan screen container
-        self.Scan_Screen = Gtk.Box()
+        self.Scan_Screen = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+
+        # Creating elements for the Scan screen
+        self.btnScan_network = Gtk.Button(label = "Scan the network")
+        self.btnScan_network.connect("clicked", self.on_btnScan_network_clicked)
+        self.Scan_Screen.add(self.btnScan_network)
+
+        self.LAN_IP_List = Gtk.ListBox()
+        self.LAN_IP_List.set_selection_mode(Gtk.SelectionMode.NONE)
+        self.Scan_Screen.add(self.LAN_IP_List)
 
 #       Describing the screen load sequence
         config.read('netrunner-config.ini')
         Config_welcome = str(config.get('STARTUP', 'welcome_screen'))
+        Config_screen = int(config.get('STARTUP', 'active_tab'))
         if Config_welcome == 'True':
                 print("Welcome screen is enabled")
                 self.chkWelcome.set_active(True)
@@ -192,6 +203,11 @@ class OpsWindow(Gtk.Window):
         if Config_welcome == 'False':
                 print("Welcome screen is disabled")
                 self.Welcome_Screen.hide()
+                if Config_screen == 1:
+                        self.MainContainer.add(self.Scan_Screen)
+                        self.Scan_Screen.show()
+                        self.btnOpsScan.modify_bg(Gtk.StateType(0), Gdk.color_parse('#fcec0c'))
+                        self.btnOpsScan.modify_fg(Gtk.StateType(0), Gdk.color_parse('#000000'))
 
 #   Operating the local machine info button
     def task_SysInfo_clicked(self, btnSysInfo):
@@ -273,37 +289,15 @@ class OpsWindow(Gtk.Window):
         with open('netrunner-config.ini', 'w') as config_file:
                 config.write(config_file)
 
-    def Pinger(job_q, results_q):
-        DEVNULL = open(os.devnull, 'w')
-        while True:
-            myIPAddress = job_q.get()
-            if myIPAddress is None:
-                break
-            try:
-                subprocess.check_call(['ping', '-c1', myIPAddress],
-                                    stdout=DEVNULL)
-                results_q.put(myNetIPAddress)
-            except:
-                pass
-
-    def task_network_mapper(pool_size=128):
-        
-        # Create the container to hold IP addresses
-        IP_list = list()
-
-        # get local machine's IP and compose a base like 192.168.1.xxx
-        IP_parts = myIPAddress.split(".")
-        base_IP = IP_parts[0] + "." + IP_parts[1] + "." + IP_parts[2] +"."
-
-        # Describing the jobs quu and the results stack (same thing, actually)
-        JobsQueue = multiprocessing.Queue()
-        ResultsStack = multiprocessing.Queue()
-
-        # Describing the jobs pool structure and process
-        pool = [multiprocessing.Process(target=Pinger, args=(JobsQueue, ResultsStack)) for i in range(pool_size)]
-
-        for GO in pool:
-            GO.start()
+#       Operating the Scan_network button
+    def on_btnScan_network_clicked(self, btnScan_network):
+        local_network = "192.168.1.0/24"
+        lan_scan = networkscan.Networkscan(local_network)
+        lan_scan.run()
+        for item in lan_scan.list_of_hosts_found:
+            self.LAN_IP_List.add(ListBoxDataRow(item))
+            print(item)
+        self.LAN_IP_List.show_all()
 
 window = OpsWindow()
 window.connect("delete-event", Gtk.main_quit)
