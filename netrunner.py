@@ -29,8 +29,9 @@ myNetworkInterfaces = socket.if_nameindex()
 class ListBoxDataRow(Gtk.ListBoxRow):
     def __init__(self, data):
         super().__init__()
-        self.data = data
-        self.add(Gtk.Label(label=data))
+        #self.data = data
+        #self.add(Gtk.Label(label=data))
+
 # Describe the main operations window
 class OpsWindow(Gtk.Window):
 
@@ -132,8 +133,8 @@ class OpsWindow(Gtk.Window):
         
         # Parsing the interfaces string to the list and printing every list item in the terminal
         for IntData in myNetworkInterfaces: 
-                IntList_store.append(IntData)
-                print(IntData)
+            IntList_store.append(IntData)
+            print(IntData)
         
         # Creating a ComboBox instance
         self.InterfaceSelector = Gtk.ComboBox.new_with_model_and_entry(IntList_store)
@@ -169,22 +170,25 @@ class OpsWindow(Gtk.Window):
         # Creating elements for the Welcome screen
         self.lblWelcome = Gtk.Label()
         self.lblWelcome.set_markup(
-                "<big>Netrunner</big>\n" +
-                "Network device config monitoring tool"
+            "<big>Netrunner</big>\n" +
+            "Network device config monitoring tool"
         )
         self.Welcome_Screen.add(self.lblWelcome)
 
-        self.chkWelcome = Gtk.CheckButton(label="Show welcome screen at startup")
+        self.chkWelcome = Gtk.CheckButton(label = "Show welcome screen at startup")
         self.chkWelcome.connect("toggled", self.on_chkWelcome_toggled)
         self.Welcome_Screen.add(self.chkWelcome)
 
-#       Describing the Scan screen container
-        self.Scan_Screen = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+#       Describing the Scan screen container and toolbar
+        self.Scan_Screen = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing = 5)
+        self.Scan_Screen_Toolbar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        self.Scan_Screen.pack_start(self.Scan_Screen_Toolbar, True, True, 0)
+        self.Scan_Screen_Toolbar.show()
 
-        # Creating elements for the Scan screen
+        # Creating elements for the Scan screen toolbar
         self.btnScan_network = Gtk.Button(label = "Scan the network")
         self.btnScan_network.connect("clicked", self.on_btnScan_network_clicked)
-        self.Scan_Screen.add(self.btnScan_network)
+        self.Scan_Screen_Toolbar.add(self.btnScan_network)
 
         self.LAN_IP_List = Gtk.ListBox()
         self.LAN_IP_List.set_selection_mode(Gtk.SelectionMode.NONE)
@@ -195,19 +199,19 @@ class OpsWindow(Gtk.Window):
         Config_welcome = str(config.get('STARTUP', 'welcome_screen'))
         Config_screen = int(config.get('STARTUP', 'active_tab'))
         if Config_welcome == 'True':
-                print("Welcome screen is enabled")
-                self.chkWelcome.set_active(True)
-                self.MainContainer.add(self.Welcome_Screen)
-                self.Welcome_Screen.show()
+            print("Welcome screen is enabled")
+            self.chkWelcome.set_active(True)
+            self.MainContainer.add(self.Welcome_Screen)
+            self.Welcome_Screen.show()
 
         if Config_welcome == 'False':
-                print("Welcome screen is disabled")
-                self.Welcome_Screen.hide()
-                if Config_screen == 1:
-                        self.MainContainer.add(self.Scan_Screen)
-                        self.Scan_Screen.show()
-                        self.btnOpsScan.modify_bg(Gtk.StateType(0), Gdk.color_parse('#fcec0c'))
-                        self.btnOpsScan.modify_fg(Gtk.StateType(0), Gdk.color_parse('#000000'))
+            print("Welcome screen is disabled")
+            self.Welcome_Screen.hide()
+            if Config_screen == 1:
+                self.MainContainer.add(self.Scan_Screen)
+                self.Scan_Screen.show()
+                self.btnOpsScan.modify_bg(Gtk.StateType(0), Gdk.color_parse('#fcec0c'))
+                self.btnOpsScan.modify_fg(Gtk.StateType(0), Gdk.color_parse('#000000'))
 
 #   Operating the local machine info button
     def task_SysInfo_clicked(self, btnSysInfo):
@@ -220,9 +224,9 @@ class OpsWindow(Gtk.Window):
         config.read('netrunner-config.ini')
         Config_welcome = bool(config.get('STARTUP', 'welcome_screen'))
         if self.chkWelcome.get_active():
-                config.set('STARTUP', 'welcome_screen', 'False')
-                with open('netrunner-config.ini', 'w') as config_file:
-                        config.write(config_file)
+            config.set('STARTUP', 'welcome_screen', 'False')
+            with open('netrunner-config.ini', 'w') as config_file:
+                config.write(config_file)
         
 #   Operating the Scan toggle button
     def on_btnOpsScan_toggled(self, btnOpsScan):
@@ -235,11 +239,15 @@ class OpsWindow(Gtk.Window):
         self.btnOpsTests.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
         self.btnOpsTests.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
 
+        # show the container with controls:
+        self.MainContainer.add(self.Scan_Screen)
+        self.Scan_Screen.show()
+
         # write the active tab number into config to open at next startup:
         config.read('netrunner-config.ini')
         config.set('STARTUP', 'active_tab', '1')
         with open('netrunner-config.ini', 'w') as config_file:
-                config.write(config_file)
+            config.write(config_file)
 
 #   Operating the Map toggle button
     def on_btnOpsMap_toggled(self, btnOpsMap):
@@ -255,7 +263,7 @@ class OpsWindow(Gtk.Window):
         config.read('netrunner-config.ini')
         config.set('STARTUP', 'active_tab', '2')
         with open('netrunner-config.ini', 'w') as config_file:
-                config.write(config_file)
+            config.write(config_file)
         
 #   Operating the RDP toggle button
     def on_btnOpsRDP_toggled(self, btnOpsRDP):
@@ -271,7 +279,7 @@ class OpsWindow(Gtk.Window):
         config.read('netrunner-config.ini')
         config.set('STARTUP', 'active_tab', '3')
         with open('netrunner-config.ini', 'w') as config_file:
-                config.write(config_file)
+            config.write(config_file)
 
 #   Operating the Tests toggle button
     def on_btnOpsTests_toggled(self, btnOpsTests):
@@ -287,7 +295,7 @@ class OpsWindow(Gtk.Window):
         config.read('netrunner-config.ini')
         config.set('STARTUP', 'active_tab', '4')
         with open('netrunner-config.ini', 'w') as config_file:
-                config.write(config_file)
+            config.write(config_file)
 
 #       Operating the Scan_network button
     def on_btnScan_network_clicked(self, btnScan_network):
@@ -295,9 +303,18 @@ class OpsWindow(Gtk.Window):
         lan_scan = networkscan.Networkscan(local_network)
         lan_scan.run()
         for item in lan_scan.list_of_hosts_found:
-            self.LAN_IP_List.add(ListBoxDataRow(item))
-            print(item)
+            FQDN_Test = socket.getfqdn(item)
+            Scan_List_Row = Gtk.ListBoxRow()
+            H_Box = Gtk.Box(orientation = Gtk.Orientation.HORIZONTAL, spacing = 10)
+            Scan_List_Row.add(H_Box)
+            lbl_Scan_IP = Gtk.Label(label = str(item), xalign = 0)
+            lbl_Scan_FQDN = Gtk.Label(label = str(FQDN_Test), xalign = 0)
+            H_Box.pack_start(lbl_Scan_IP, True, True, 0)
+            H_Box.pack_start(lbl_Scan_FQDN, True, True, 0)
+            self.LAN_IP_List.add(Scan_List_Row)
+            print(item + " :: " + FQDN_Test)
         self.LAN_IP_List.show_all()
+        self.btnScan_network.set_sensitive(False)
 
 window = OpsWindow()
 window.connect("delete-event", Gtk.main_quit)
