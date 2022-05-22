@@ -1,9 +1,11 @@
 import socket
 import configparser
 import networkscan
+import getmac
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, Gio, Pango
+from getmac import get_mac_address
 
 # Declare ConfigParser, read the configuration file into memory
 config = configparser.ConfigParser()
@@ -309,8 +311,10 @@ class OpsWindow(Gtk.Window):
             Scan_List_Row.add(H_Box)
             lbl_Scan_IP = Gtk.Label(label = str(item), xalign = 0)
             lbl_Scan_FQDN = Gtk.Label(label = str(FQDN_Test), xalign = 0)
+            lbl_Scan_MAC = Gtk.Label(label = str(get_mac_address(ip = item)))
             H_Box.pack_start(lbl_Scan_IP, True, True, 0)
             H_Box.pack_start(lbl_Scan_FQDN, True, True, 0)
+            H_Box.pack_start(lbl_Scan_MAC, True, True, 0)
             self.LAN_IP_List.add(Scan_List_Row)
             print(item + " :: " + FQDN_Test)
         self.LAN_IP_List.show_all()
