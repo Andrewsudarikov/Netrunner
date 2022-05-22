@@ -2,14 +2,21 @@ import socket
 import configparser
 import networkscan
 import getmac
+import requests
+import urllib3
 import gi
+import time
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, Gio, Pango
 from getmac import get_mac_address
+from mac_vendor_lookup import MacLookup
 
 # Declare ConfigParser, read the configuration file into memory
 config = configparser.ConfigParser()
 config.read('netrunner_config.ini')
+
+# declare the pool manager for network requests
+http = urllib3.PoolManager()
 
 # set up the ping tool
 NetIP_puller = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -302,6 +309,7 @@ class OpsWindow(Gtk.Window):
 #       Operating the Scan_network button
     def on_btnScan_network_clicked(self, btnScan_network):
         local_network = "192.168.1.0/24"
+        vendor_check_url = "https://api.macvendors.com/"
         lan_scan = networkscan.Networkscan(local_network)
         lan_scan.run()
         for item in lan_scan.list_of_hosts_found:
@@ -311,12 +319,17 @@ class OpsWindow(Gtk.Window):
             Scan_List_Row.add(H_Box)
             lbl_Scan_IP = Gtk.Label(label = str(item), xalign = 0)
             lbl_Scan_FQDN = Gtk.Label(label = str(FQDN_Test), xalign = 0)
-            lbl_Scan_MAC = Gtk.Label(label = str(get_mac_address(ip = item)))
+            Current_mac_address = str(get_mac_address(ip = item))
+            lbl_Scan_MAC = Gtk.Label(label = str(Current_mac_address), xalign = 0)
+            vendor_name = requests.get(url="https://api.macvendors.com/%s" %Current_mac_address)
+            lbl_Device_Vendor = Gtk.Label(label = str(vendor_name.text))
             H_Box.pack_start(lbl_Scan_IP, True, True, 0)
             H_Box.pack_start(lbl_Scan_FQDN, True, True, 0)
             H_Box.pack_start(lbl_Scan_MAC, True, True, 0)
+            H_Box.pack_start(lbl_Device_Vendor, True, True, 0)
             self.LAN_IP_List.add(Scan_List_Row)
             print(item + " :: " + FQDN_Test)
+            time.sleep(10)
         self.LAN_IP_List.show_all()
         self.btnScan_network.set_sensitive(False)
 
