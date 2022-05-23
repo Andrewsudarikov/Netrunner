@@ -319,7 +319,10 @@ class OpsWindow(Gtk.Window):
             Scan_List_Row.add(H_Box)
             lbl_Scan_IP = Gtk.Label(label = str(item), xalign = 0)
             lbl_Scan_FQDN = Gtk.Label(label = str(FQDN_Test), xalign = 0)
-            Current_mac_address = str(get_mac_address(ip = item))
+            if item == myNetIPAddress:
+                Current_mac_address = str(get_mac_address(hostname = "localhost"))
+            else:
+                Current_mac_address = str(get_mac_address(ip = item))
             lbl_Scan_MAC = Gtk.Label(label = str(Current_mac_address), xalign = 0)
             vendor_name = requests.get(url="https://api.macvendors.com/%s" %Current_mac_address)
             lbl_Device_Vendor = Gtk.Label(label = str(vendor_name.text))
@@ -328,7 +331,7 @@ class OpsWindow(Gtk.Window):
             H_Box.pack_start(lbl_Scan_MAC, True, True, 0)
             H_Box.pack_start(lbl_Device_Vendor, True, True, 0)
             self.LAN_IP_List.add(Scan_List_Row)
-            print(item + " :: " + FQDN_Test)
+            print(item + " :: " + FQDN_Test + " :: " + Current_mac_address + " :: Getting vendor info...")
             time.sleep(10)
         self.LAN_IP_List.show_all()
         self.btnScan_network.set_sensitive(False)
