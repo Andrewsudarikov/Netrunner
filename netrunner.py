@@ -309,31 +309,35 @@ class OpsWindow(Gtk.Window):
 #       Operating the Scan_network button
     def on_btnScan_network_clicked(self, btnScan_network):
         local_network = "192.168.1.0/24"
-        vendor_check_url = "https://api.macvendors.com/"
+        vendor_check_url = "https://api.macvendors.com/%s"
         lan_scan = networkscan.Networkscan(local_network)
+        NetworkAddressStorage = Gtk.ListStore(str, str, str, str)
         lan_scan.run()
-        for item in lan_scan.list_of_hosts_found:
-            FQDN_Test = socket.getfqdn(item)
-            Scan_List_Row = Gtk.ListBoxRow()
-            H_Box = Gtk.Box(orientation = Gtk.Orientation.HORIZONTAL, spacing = 10)
-            Scan_List_Row.add(H_Box)
-            lbl_Scan_IP = Gtk.Label(label = str(item), xalign = 0)
-            lbl_Scan_FQDN = Gtk.Label(label = str(FQDN_Test), xalign = 0)
-            if item == myNetIPAddress:
+        for active_found_IP in lan_scan.list_of_hosts_found:
+            FQDN_Test = socket.getfqdn(active_found_IP)
+            if FQDN_Test == active_found_IP:
+                FQDN_Test = "-"
+            if active_found_IP == myNetIPAddress:
                 Current_mac_address = str(get_mac_address(hostname = "localhost"))
             else:
-                Current_mac_address = str(get_mac_address(ip = item))
-            lbl_Scan_MAC = Gtk.Label(label = str(Current_mac_address), xalign = 0)
-            vendor_name = requests.get(url="https://api.macvendors.com/%s" %Current_mac_address)
-            lbl_Device_Vendor = Gtk.Label(label = str(vendor_name.text))
-            H_Box.pack_start(lbl_Scan_IP, True, True, 0)
-            H_Box.pack_start(lbl_Scan_FQDN, True, True, 0)
-            H_Box.pack_start(lbl_Scan_MAC, True, True, 0)
-            H_Box.pack_start(lbl_Device_Vendor, True, True, 0)
-            self.LAN_IP_List.add(Scan_List_Row)
-            print(item + " :: " + FQDN_Test + " :: " + Current_mac_address + " :: Getting vendor info...")
+                Current_mac_address = str(get_mac_address(ip = active_found_IP))
+            Vendor_name = requests.get(url=str(vendor_check_url) %Current_mac_address)
+            IPListIter = NetworkAddressStorage.append([str(active_found_IP), 
+										            str(FQDN_Test),
+										            str(Current_mac_address),
+                                                    str(Vendor_name.text)])
+            print(active_found_IP + " :: " + FQDN_Test + " :: " + Current_mac_address + " :: Getting vendor info...")
             time.sleep(10)
-        self.LAN_IP_List.show_all()
+        IP_Scan_Tree = Gtk.TreeView(model = NetworkAddressStorage)
+        renderer = Gtk.CellRendererText()
+        for i, column_title in enumerate(
+        ["IP Address", "FQDN", "MAC Address", "Device vendor"]
+        ):
+            renderer = Gtk.CellRendererText()
+            column = Gtk.TreeViewColumn(column_title, renderer, text=i)
+            IP_Scan_Tree.append_column(column)
+        self.Scan_Screen.pack_end(IP_Scan_Tree, True, True, 0)
+        IP_Scan_Tree.show()
         self.btnScan_network.set_sensitive(False)
 
 window = OpsWindow()
