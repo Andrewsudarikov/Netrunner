@@ -197,7 +197,9 @@ class OpsWindow(Gtk.Window):
         # Creating elements for the Scan screen toolbar
         self.btnScan_network = Gtk.Button(label = "Scan the network")
         self.btnScan_network.connect("clicked", self.on_btnScan_network_clicked)
+        self.Spinner = Gtk.Spinner()
         self.Scan_Screen_Toolbar.add(self.btnScan_network)
+        self.Scan_Screen_Toolbar.pack_end(self.Spinner, True, True, 0)
 
         self.LAN_IP_List = Gtk.ListBox()
         self.LAN_IP_List.set_selection_mode(Gtk.SelectionMode.NONE)
@@ -313,6 +315,7 @@ class OpsWindow(Gtk.Window):
         lan_scan = networkscan.Networkscan(local_network)
         NetworkAddressStorage = Gtk.ListStore(str, str, str, str)
         lan_scan.run()
+        self.Spinner.start()
         for active_found_IP in lan_scan.list_of_hosts_found:
             FQDN_Test = socket.getfqdn(active_found_IP)
             if FQDN_Test == active_found_IP:
@@ -327,7 +330,7 @@ class OpsWindow(Gtk.Window):
 										            str(Current_mac_address),
                                                     str(Vendor_name.text)])
             print(active_found_IP + " :: " + FQDN_Test + " :: " + Current_mac_address + " :: Getting vendor info...")
-            time.sleep(10)
+            time.sleep(2)
         IP_Scan_Tree = Gtk.TreeView(model = NetworkAddressStorage)
         renderer = Gtk.CellRendererText()
         for i, column_title in enumerate(
@@ -339,6 +342,7 @@ class OpsWindow(Gtk.Window):
         self.Scan_Screen.pack_end(IP_Scan_Tree, True, True, 0)
         IP_Scan_Tree.show()
         self.btnScan_network.set_sensitive(False)
+        self.Spinner.stop()
 
 window = OpsWindow()
 window.connect("delete-event", Gtk.main_quit)
