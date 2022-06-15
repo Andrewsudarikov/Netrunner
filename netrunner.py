@@ -197,6 +197,7 @@ class OpsWindow(Gtk.Window):
         # Creating elements for the Scan screen toolbar
         self.btnScan_network = Gtk.Button(label = "Scan the network")
         self.btnScan_network.connect("clicked", self.on_btnScan_network_clicked)
+
         self.Spinner = Gtk.Spinner()
         self.Scan_Screen_Toolbar.add(self.btnScan_network)
         self.Scan_Screen_Toolbar.pack_end(self.Spinner, True, True, 0)
@@ -204,6 +205,24 @@ class OpsWindow(Gtk.Window):
         self.LAN_IP_List = Gtk.ListBox()
         self.LAN_IP_List.set_selection_mode(Gtk.SelectionMode.NONE)
         self.Scan_Screen.add(self.LAN_IP_List)
+
+#       Describing the Map screen container
+        self.Map_Screen = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing = 5)
+        self.Map_Screen_Toolbar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        self.Map_Screen.pack_start(self.Map_Screen_Toolbar, True, True, 0)
+        self.Map_Screen_Toolbar.show()
+
+#       Describing the RDP screen container
+        self.RDP_Screen = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing = 5)
+        self.RDP_Screen_Toolbar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        self.RDP_Screen.pack_start(self.RDP_Screen_Toolbar, True, True, 0)
+        self.RDP_Screen_Toolbar.show()
+
+#       Describing the Test screen toolbar
+        self.Test_Screen = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing = 5)
+        self.Test_Screen_Toolbar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        self.Test_Screen.pack_start(self.Test_Screen_Toolbar, True, True, 0)
+        self.Test_Screen_Toolbar.show()
 
 #       Describing the screen load sequence
         config.read('netrunner-config.ini')
@@ -241,24 +260,31 @@ class OpsWindow(Gtk.Window):
         
 #   Operating the Scan toggle button
     def on_btnOpsScan_toggled(self, btnOpsScan):
-        self.btnOpsScan.modify_bg(Gtk.StateType(0), Gdk.color_parse('#fcec0c'))
-        self.btnOpsScan.modify_fg(Gtk.StateType(0), Gdk.color_parse('#000000'))
-        self.btnOpsMap.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
-        self.btnOpsMap.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
-        self.btnOpsRDP.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
-        self.btnOpsRDP.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
-        self.btnOpsTests.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
-        self.btnOpsTests.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
-
-        # show the container with controls:
-        self.MainContainer.add(self.Scan_Screen)
-        self.Scan_Screen.show()
-
-        # write the active tab number into config to open at next startup:
         config.read('netrunner-config.ini')
-        config.set('STARTUP', 'active_tab', '1')
-        with open('netrunner-config.ini', 'w') as config_file:
-            config.write(config_file)
+        Config_ScanScreen = bool(config.get('OPERATIONS', 'scan_screen_enabled'))
+        if Config_ScanScreen == False:
+
+            self.btnOpsScan.modify_bg(Gtk.StateType(0), Gdk.color_parse('#fcec0c'))
+            self.btnOpsScan.modify_fg(Gtk.StateType(0), Gdk.color_parse('#000000'))
+            self.btnOpsMap.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
+            self.btnOpsMap.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
+            self.btnOpsRDP.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
+            self.btnOpsRDP.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
+            self.btnOpsTests.modify_bg(Gtk.StateType(0), Gdk.color_parse('#58482c'))
+            self.btnOpsTests.modify_fg(Gtk.StateType(0), Gdk.color_parse('#d1c5c0'))
+
+            # hide the other containers and show the Scan_Screen container with controls:
+            self.MainContainer.remove(self.Map_Screen)
+            self.MainContainer.remove(self.RDP_Screen)
+            self.MainContainer.remove(self.Test_Screen)
+            self.MainContainer.add(self.Scan_Screen)
+            self.Scan_Screen.show()
+
+            # write the active tab number into config to open at next startup:
+            config.read('netrunner-config.ini')
+            config.set('STARTUP', 'active_tab', '1')
+            with open('netrunner-config.ini', 'w') as config_file:
+                config.write(config_file)
 
 #   Operating the Map toggle button
     def on_btnOpsMap_toggled(self, btnOpsMap):
