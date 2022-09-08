@@ -336,7 +336,7 @@ class OpsWindow(Gtk.Window):
 
 #       Operating the Scan_network button
     def on_btnScan_network_clicked(self, btnScan_network):
-        local_network = "192.168.1.0/24"
+        local_network = "192.168.1.0/24"    # don't forget this is a CIDR
         vendor_check_url = "https://api.macvendors.com/%s"
         lan_scan = networkscan.Networkscan(local_network)
         NetworkAddressStorage = Gtk.ListStore(str, str, str, str)
